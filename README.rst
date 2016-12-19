@@ -20,3 +20,7 @@ To get this up-and-running quickly:
 8. In the first column created, add the "Smart Mirror Clock" plugin
 9. In the last column created, add the "Smart Mirror Weather" plugin (NOTE: 
    You will need your own, free Weather Underground API key)
+
+
+.. image:: example.png
+   :width: 640px
