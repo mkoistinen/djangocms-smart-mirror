@@ -1,0 +1,108 @@
+{% load sekizai_tags staticfiles %}
+<div class="smart-mirror-weather" data-api-key="{{ instance.api_key }}" data-alignment="{{ instance.alignment }}" data-zip-code="{{ instance.zip_code }}">
+    <div class="current"></div>
+    <div class="forecast"></div>
+</div>
+
+{% addtoblock "css" %}<link rel="stylesheet" href="{% static "smart_mirror_weather/css/dripicons-weather-webfont.css" %}">{% endaddtoblock %}
+{% addtoblock "css" %}
+<style>
+    .smart-mirror-weather {
+        font-weight: 300;
+        color: #fff;
+        letter-spacing: -0.0625em;
+    }
+    .smart-mirror-weather .current {
+        font-size: 48px;
+    }
+    .smart-mirror-weather .current span,
+    .smart-mirror-weather .hourly span {
+        margin-right: 0.25em;
+    }
+    .smart-mirror-weather .current span:last-child,
+    .smart-mirror-weather .hourly span:last-child {
+        margin-right: 0;
+    }
+    .smart-mirror-weather .diw-icon {
+        position: relative;
+        bottom: -0.125em;
+    }
+    .smart-mirror-weather .hourly {
+        font-size: 34px;
+        color: #999;
+        line-height: 0.25em;
+    }
+</style>
+{% endaddtoblock %}
+{% addtoblock "js" %}
+<script>
+$(document).ready(function($) {
+    var $weather = $('.smart-mirror-weather');
+    var $forecast = $weather.find('.forecast');
+    var $current = $weather.find('.current');
+    var zipCode = $weather.data('zip-code');
+    var APIKey = $weather.data('api-key');
+    var align = $weather.data('alignment');
+    var icons = {
+        'clear': ['sun', 'moon-50'],
+        'cloudy':  ['clouds', 'clouds'],
+        'flurries': ['cloud-snow-sun-2', 'cloud-snow-moon'],
+        'hazy': ['cloud-fog', 'cloud-fog-moon'],
+        'mostly cloudy': ['clouds-sun-2', 'clouds-moon'],
+        'mostly sunny': ['sun', 'moon-50'],
+        'overcast':  ['clouds', 'clouds'],
+        'partly cloudy': ['cloud-sun-2', 'cloud-moon'],
+        'partly sunny': ['clouds-sun-2', 'clouds-moon'],
+        'rain': ['cloud-rain-sun-2', 'cloud-rain-moon'],
+        'sleet': ['cloud-hail-sun-2', 'cloud-hail-moon'],
+        'snow': ['cloud-snow-sun-2', 'cloud-snow-moon'],
+        'sunny': ['sun', 'moon-50'],
+        'thunderstorm': ['cloud-lightning-sun-2', 'cloud-lightning-moon'],
+    };
+    $weather.css({'text-align': align});
+
+    function updateWeather(){
+        $.ajax({
+            url: "http://api.wunderground.com/api/" + APIKey + "/conditions/q/" + zipCode + ".json",
+            dataType: "jsonp",
+            success: function (parsed_json) {
+                var current = parsed_json['current_observation'];
+
+                // $current.append($('<h2/>').text(current['display_location']['city'] + " (" + current['display_location']['zip'] + ")"));
+                // $current.append($('<p/>').text(current['weather']));
+                var current_body = $('<p/>').addClass('current');
+                current_body.append($('<span/>').addClass('diw-icon').addClass('diw-' + icons[current['weather'].toLowerCase()][0]));
+                current_body.append($('<span/>').html(current['temp_f'] + "&thinsp;&deg;F"));
+                current_body.append($('<span/>').text(current['relative_humidity']));
+                $current.html(current_body);
+            }
+        });
+        $.ajax({
+            url: "http://api.wunderground.com/api/" + APIKey + "/hourly/q/" + zipCode + ".json",
+            dataType: "jsonp",
+            success: function (parsed_json) {
+                var forecast = parsed_json['hourly_forecast'];
+                $forecast.empty();
+                for (index in forecast) {
+window.console.log(index, forecast);
+                    if (index > 8) break;
+                    var hour = forecast[index]['FCTTIME']['hour'];
+                    var cond = forecast[index]['condition'];
+                    var temp = forecast[index]['temp']['english'];
+                    var humd = forecast[index]['humidity'];
+                    var hourly_body = $('<p/>').addClass('hourly');
+
+                    hourly_body.append($('<span/>').text(hour + ":00"));
+                    hourly_body.append($('<span/>').addClass('diw-icon').addClass('diw-' + icons[cond.toLowerCase()][0]));
+                    hourly_body.append($('<span/>').html(temp + "&thinsp;&deg;F"));
+                    hourly_body.append($('<span/>').text(humd + "%"));
+                    $forecast.append(hourly_body);
+                }
+            }
+        });
+    }
+    updateWeather();
+    setInterval(updateWeather, 900000);
+});
+</script>
+{% endaddtoblock %}

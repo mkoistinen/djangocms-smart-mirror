@@ -1,0 +1,6 @@
+{
+    "package-name": "smart-mirror-weather",
+    "installed-apps": [
+        "smart_mirror_weather"
+    ]
+}

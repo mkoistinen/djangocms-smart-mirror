@@ -1,0 +1,72 @@
+{% load sekizai_tags l10n %}
+<div id="magic-clock-{{ instance.pk|unlocalize }}"
+     class="magic-clock digital {{ instance.alignment }}"
+     data-show-seconds="{% if instance.show_seconds == True %}true{% else %}false{% endif %}"
+     data-twenty-four-hour="{% if instance.twenty_four_hour == True %}true{% else %}false{% endif %}"
+>
+    <span class="hours"></span><span class="minutes"></span><span class="seconds"></span>
+    <spam class="ampm"></spam>
+</div>
+{% addtoblock "css" %}
+<style>
+.magic-clock {
+    background-color: #000;
+    color: #fff;
+    font-size: 48px;
+    font-weight: 300;
+}
+.magic-clock.left { text-align: left; }
+.magic-clock.right { text-align: right; }
+.magic-clock .minutes::before,
+.magic-clock .seconds::before {
+    content: ":";
+}
+.magic-clock .ampm {
+    margin-left: 0.25em;
+}
+</style>
+{% endaddtoblock %}
+{% addtoblock "js" %}
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+{% endaddtoblock %}
+{% addtoblock "js" %}
+<script>
+    // TODO: Rewrite this
+    var $clock = $('.magic-clock');
+    var showSeconds = $clock.data('show-seconds');
+    var twentyFourHour = $clock.data('twenty-four-hour');
+
+    function setup(){
+        $clock.find('.seconds').toggle(!!showSeconds);
+        $clock.find('.ampm').toggle(!twentyFourHour);
+    }
+    function drawTime(){
+        var now = new Date();
+        var hour = now.getHours();
+        var minute = now.getMinutes();
+        var second = now.getSeconds();
+        if (hour < 10) { hour = "0" + hour; }
+        if (minute < 10) { minute = "0" + minute; }
+        if (second < 10) { second = "0" + second; }
+        if (!twentyFourHour && hour > 12) {
+            $clock.find('.hours').text(hour - 12);
+        }
+        else {
+            $clock.find('.hours').text(hour);
+        }
+        $clock.find('.minutes').text(minute);
+        $clock.find('.seconds').text(second);
+        if (hour >= 12){
+            $clock.find('.ampm').text('PM')
+        }
+        else {
+            $clock.find('.ampm').text('AM')
+        }
+    }
+    setup();
+    drawTime();
+    $(function(){
+        setInterval(drawTime, 1000);
+    });
+</script>
+{% endaddtoblock %}

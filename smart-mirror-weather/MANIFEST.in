@@ -1,0 +1,2 @@
+recursive-include smart_mirror_weather/templates *
+recursive-include smart_mirror_weather/static *

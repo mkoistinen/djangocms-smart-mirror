@@ -1,0 +1,6 @@
+{
+    "package-name": "smart-mirror-clock",
+    "installed-apps": [
+        "smart_mirror_clock"
+    ]
+}

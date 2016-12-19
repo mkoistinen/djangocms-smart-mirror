@@ -1,0 +1,2 @@
+recursive-include smart_mirror_clock/templates *
+recursive-include smart_mirror_clock/static *
